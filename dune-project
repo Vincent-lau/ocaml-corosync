@@ -1,16 +1,16 @@
 (lang dune 3.11)
 (using ctypes 0.3)
 
-(name corosync)
+(name ocaml-corosync)
 
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github Vincent-lau/ocaml-corosync))
 
-(authors "Author Name")
+(authors "Shuntian Liu")
 
-(maintainers "Maintainer Name")
+(maintainers "Shuntian Liu")
 
 (license LICENSE)
 
@@ -18,7 +18,7 @@
 
 (package
  (name corosync)
- (synopsis "A short synopsis")
+ (synopsis "OCaml Corosync binding")
  (description "A longer description")
  (depends ocaml dune)
  (tags
