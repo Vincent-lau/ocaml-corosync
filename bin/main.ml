@@ -1,12 +1,15 @@
 open Corosync
 
 let () =
-  match
-    Cmap.with_handle (fun handle -> Cmap.get handle "totem.cluster_name")
-  with
-  | Ok (CmapString s) ->
-      print_endline s
-  | Error e ->
-      Cmap.reterr_to_string e |> failwith
-  | _ ->
-      failwith "Unimplmeneted"
+  let open Cmap in
+  ( with_handle @@ fun handle ->
+    Cmap.get_prefix handle "totem" |> function
+    | Ok l ->
+        List.iter
+          (fun (k, v) -> Printf.printf "%s: %s\n" k (CmapRet.to_string v))
+          l ;
+        Ok ()
+    | Error e ->
+        failwith (CmapError.to_string e)
+  )
+  |> ignore

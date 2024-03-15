@@ -7,75 +7,202 @@ let cmap_handle_t = uint64_t
 
 let size_t = uint64_t
 
-(* TODO change to enum types *)
 let cmap_value_types_t = int
 
 let cs_error_t = int
 
-type cmap_ret_error =
-  | CsOk
-  | CsErrLibrary
-  | CsErrVersion
-  | CsErrInit
-  | CsErrTimeout
-  | CsErrTryAgain
-  | CsErrInvalidParam
-  | CsErrNoMemory
-  | CsErrBadHandle
-  | CsErrBusy
-  | CsErrAccess (* 11 *)
-  | CsErrNotExist (* 12 *)
-  | CsErrNameTooLong (* 13 *)
-  | CsErrExist (* 14 *)
-  | CsErrNoSpace (* 15 *)
-  | CsErrInterupt
-  | CsErrNameNotFound
-  | CsErrNoResources
-  | CsErrNotSupported
-  | CsErrBadOperation
-  | CsErrFailedOperation
-  | CsErrMessageError
-  | CsErrQueueFull
-  | CsErrQueueNotAvailable
-  | CsErrBadFlags
-  | CsErrTooBig (* 26 *)
-  | CsErrNoSections (* 27 *)
-  | CsErrContextNotFound (* 28 *)
-  | CsErrTooManyGroups (* 30 *)
-  | CsErrSecurity (* 100 *)
+module CmapError = struct
+  exception Unknown_Err_Code of int
 
-let parse_ret_err = function
-  | 1 ->
-      Ok ()
-  | 2 ->
-      Error CsErrLibrary
-  | 3 ->
-      Error CsErrVersion
-  (* TODO finish this *)
-  | e ->
-      Printf.sprintf "unknown error %d" e |> failwith
+  type t =
+    | CsOk
+    | CsErrLibrary
+    | CsErrVersion
+    | CsErrInit
+    | CsErrTimeout
+    | CsErrTryAgain
+    | CsErrInvalidParam
+    | CsErrNoMemory
+    | CsErrBadHandle
+    | CsErrBusy
+    | CsErrAccess (* 11 *)
+    | CsErrNotExist (* 12 *)
+    | CsErrNameTooLong (* 13 *)
+    | CsErrExist (* 14 *)
+    | CsErrNoSpace (* 15 *)
+    | CsErrInterupt
+    | CsErrNameNotFound
+    | CsErrNoResources
+    | CsErrNotSupported
+    | CsErrBadOperation
+    | CsErrFailedOperation
+    | CsErrMessageError
+    | CsErrQueueFull
+    | CsErrQueueNotAvailable
+    | CsErrBadFlags
+    | CsErrTooBig (* 26 *)
+    | CsErrNoSections (* 27 *)
+    | CsErrContextNotFound (* 28 *)
+    | CsErrTooManyGroups (* 30 *)
+    | CsErrSecurity (* 100 *)
 
-let reterr_to_string = function
-  | CsOk -> "cs_ok"
-  | CsErrLibrary -> "cs_err"
-  | _ -> failwith "Unimplemented"
+  let from_int = function
+    | 1 ->
+        CsOk
+    | 2 ->
+        CsErrLibrary
+    | 3 ->
+        CsErrVersion
+    (* TODO finish this *)
+    | 11 ->
+        CsErrExist
+    | 12 ->
+        CsErrNotExist
+    | 13 ->
+        CsErrNameTooLong
+    | 14 ->
+        CsErrExist
+    | 15 ->
+        CsErrNoSpace
+    | 16 ->
+        CsErrInterupt
+    | 17 ->
+        CsErrNameNotFound
+    | 18 ->
+        CsErrNoResources
+    | 19 ->
+        CsErrNotSupported
+    | 20 ->
+        CsErrBadOperation
+    | 21 ->
+        CsErrFailedOperation
+    | 22 ->
+        CsErrMessageError
+    | 23 ->
+        CsErrQueueFull
+    | 24 ->
+        CsErrQueueNotAvailable
+    | 25 ->
+        CsErrBadFlags
+    | 26 ->
+        CsErrTooBig
+    | 27 ->
+        CsErrNoSections
+    | 28 ->
+        CsErrContextNotFound
+    | 30 ->
+        CsErrTooManyGroups
+    | 100 ->
+        CsErrSecurity
+    | e ->
+        raise (Unknown_Err_Code e)
 
-type cmap_ret_type =
-  | CmapInt8 of int
-  | CmapUint8 of Unsigned.uint8
-  | CmapInt16 of int
-  | CmapUint16 of Unsigned.uint16
-  | CmapInt32 of Unsigned.uint32
-  | CmapUint32 of int32
-  | CmapInt64 of int64
-  | CmapUint64 of Unsigned.uint64
-  | CmapFloat of float
-  | CmapDouble of float (* ocaml does not have double def *)
-  | CmapString of string
-  | CmapBinary of Bytes.t
+  let to_result n = from_int n |> function CsOk -> Ok () | e -> Error e
+
+  let to_string = function
+    | CsOk ->
+        "cs_ok"
+    | CsErrNoSections ->
+        "cs_err_no_sections"
+    | CsErrLibrary ->
+        "cs_err_library"
+    | _ ->
+        failwith "Unimplemented"
+end
+
+module CmapValuetype = struct
+  exception Unsupported_Valuetype of int
+
+  type t =
+    | CmapValInt8
+    | CmapValUint8
+    | CmapValInt16
+    | CmapValUint16
+    | CmapValInt32
+    | CmapValUInt32
+    | CmapValInt64
+    | CmapValUint64
+    | CmapValFloat
+    | CmapValDouble
+    | CmapValString
+    | CmapValBinary
+
+  let from_int = function
+    | 1 ->
+        CmapValInt8
+    | 2 ->
+        CmapValUint8
+    | 3 ->
+        CmapValInt16
+    | 4 ->
+        CmapValUint16
+    | 5 ->
+        CmapValInt32
+    | 6 ->
+        CmapValUInt32
+    | 7 ->
+        CmapValInt64
+    | 8 ->
+        CmapValUint64
+    | 9 ->
+        CmapValFloat
+    | 10 ->
+        CmapValDouble
+    | 11 ->
+        CmapValString
+    | 12 ->
+        CmapValBinary
+    | n ->
+        raise (Unsupported_Valuetype n)
+end
+
+module CmapRet = struct
+  type t =
+    | CmapInt8 of int
+    | CmapUInt8 of Unsigned.uint8
+    | CmapInt16 of int
+    | CmapUInt16 of Unsigned.uint16
+    | CmapInt32 of int32
+    | CmapUInt32 of Unsigned.uint32
+    | CmapInt64 of int64
+    | CmapUInt64 of Unsigned.uint64
+    | CmapFloat of float
+    | CmapDouble of float (* ocaml does not have double def *)
+    | CmapString of string
+    | CmapBinary of Bytes.t
+
+  let to_string = function
+    | CmapInt8 i ->
+        string_of_int i
+    | CmapUInt8 i ->
+        Unsigned.UInt8.to_string i
+    | CmapInt16 i ->
+        string_of_int i
+    | CmapUInt16 i ->
+        Unsigned.UInt16.to_string i
+    | CmapInt32 i ->
+        Int32.to_string i
+    | CmapUInt32 i ->
+        Unsigned.UInt32.to_string i
+    | CmapInt64 i ->
+        Int64.to_string i
+    | CmapUInt64 i ->
+        Unsigned.UInt64.to_string i
+    | CmapFloat f | CmapDouble f ->
+        Float.to_string f
+    | CmapString s ->
+        s
+    | CmapBinary b ->
+        Bytes.to_string b
+end
 
 let cmap_initialize =
   foreign "cmap_initialize" (ptr cmap_handle_t @-> returning cs_error_t)
+
+let cmap_finalize =
+  foreign "cmap_finalize" (cmap_handle_t @-> returning cs_error_t)
+
+(* cmap functions *)
 
 let cmap_get_int8 =
   foreign "cmap_get_int8"
@@ -121,9 +248,6 @@ let cmap_get_string =
   foreign "cmap_get_string"
     (cmap_handle_t @-> string @-> ptr string @-> returning cs_error_t)
 
-let cmap_finalize =
-  foreign "cmap_finalize" (cmap_handle_t @-> returning cs_error_t)
-
 let cmap_get =
   foreign "cmap_get"
     (cmap_handle_t
@@ -134,47 +258,143 @@ let cmap_get =
     @-> returning cs_error_t
     )
 
+let cmap_iter_handle_t = uint64_t
+
+let cmap_iter_init =
+  foreign "cmap_iter_init"
+    (cmap_handle_t
+    @-> string
+    @-> ptr cmap_iter_handle_t
+    @-> returning cs_error_t
+    )
+
+let cmap_iter_next =
+  foreign "cmap_iter_next"
+    (cmap_handle_t
+    @-> cmap_iter_handle_t
+    @-> ptr char
+    @-> ptr size_t
+    @-> ptr cmap_value_types_t
+    @-> returning cs_error_t
+    )
+
+let cmap_iter_finialize =
+  foreign "cmap_iter_finalize"
+    (cmap_handle_t @-> cmap_iter_handle_t @-> returning cs_error_t)
+
+(* higher level get functions *)
+
+open CmapRet
+open CmapError
+
 let get_int8 handle key =
   let res = allocate int8_t 0 in
-  cmap_get_int8 !@handle key res |> parse_ret_err >>= fun () ->
-  Ok (CmapInt8 !@res)
+  cmap_get_int8 handle key res |> to_result >>= fun () -> Ok (CmapInt8 !@res)
 
 let get_uint8 handle key =
   let res = allocate uint8_t Unsigned.UInt8.zero in
-  cmap_get_uint8 !@handle key res |> parse_ret_err >>= fun () ->
-  Ok (CmapUint8 !@res)
+  cmap_get_uint8 handle key res |> to_result >>= fun () -> Ok (CmapUInt8 !@res)
+
+let get_int16 handle key =
+  let res = allocate int16_t 0 in
+  cmap_get_int16 handle key res |> to_result >>= fun () -> Ok (CmapInt16 !@res)
+
+let get_uint16 handle key =
+  let res = allocate uint16_t Unsigned.UInt16.zero in
+  cmap_get_uint16 handle key res |> to_result >>= fun () -> Ok (CmapUInt16 !@res)
+
+let get_int32 handle key =
+  let res = allocate int32_t Int32.zero in
+  cmap_get_int32 handle key res |> to_result >>= fun () -> Ok (CmapInt32 !@res)
+
+let get_uint32 handle key =
+  let res = allocate uint32_t Unsigned.UInt32.zero in
+  cmap_get_uint32 handle key res |> to_result >>= fun () -> Ok (CmapUInt32 !@res)
+
+let get_int64 handle key =
+  let res = allocate int64_t Int64.zero in
+  cmap_get_int64 handle key res |> to_result >>= fun () -> Ok (CmapInt64 !@res)
+
+let get_uint64 handle key =
+  let res = allocate uint64_t Unsigned.UInt64.zero in
+  cmap_get_uint64 handle key res |> to_result >>= fun () -> Ok (CmapUInt64 !@res)
 
 let get_string handle key =
   let res = allocate string "" in
-  cmap_get_string !@handle key res |> parse_ret_err >>= fun () ->
-  Ok (CmapString !@res)
+  cmap_get_string handle key res |> to_result >>= fun () -> Ok (CmapString !@res)
 
-let get_by_type handle key = function
-  | 1 ->
-      get_int8 handle key
-  | 2 ->
-      get_uint8 handle key
-  (* TODO finish this *)
-  | 11 ->
-      get_string handle key
-  | _ ->
-      failwith "Unknown type"
+let get_float handle key =
+  let res = allocate float 0. in
+  cmap_get_float handle key res |> to_result >>= fun () -> Ok (CmapFloat !@res)
 
-let get handle key : (cmap_ret_type, cmap_ret_error) Result.t =
+let get_double handle key =
+  let res = allocate float 0. in
+  cmap_get_double handle key res |> to_result >>= fun () -> Ok (CmapDouble !@res)
+
+let get_by_type = function
+  | CmapValuetype.CmapValInt8 ->
+      get_int8
+  | CmapValuetype.CmapValUint8 ->
+      get_uint8
+  | CmapValuetype.CmapValInt16 ->
+      get_int16
+  | CmapValuetype.CmapValUint16 ->
+      get_uint16
+  | CmapValuetype.CmapValInt32 ->
+      get_int32
+  | CmapValuetype.CmapValUInt32 ->
+      get_uint32
+  | CmapValuetype.CmapValInt64 ->
+      get_int64
+  | CmapValuetype.CmapValUint64 ->
+      get_uint64
+  | CmapValuetype.CmapValFloat ->
+      get_float
+  | CmapValuetype.CmapValDouble ->
+      get_double
+  | CmapValuetype.CmapValString ->
+      get_string
+  | CmapValuetype.CmapValBinary ->
+      failwith "Unimplemented"
+
+let get handle key =
   let value_len = allocate size_t Unsigned.UInt64.zero in
   let value_type = allocate cmap_value_types_t 0 in
-  let _e = cmap_get !@handle key null value_len value_type in
-  get_by_type handle key !@value_type
+  cmap_get handle key null value_len value_type |> CmapError.to_result
+  >>= fun () ->
+  let val_typ = CmapValuetype.from_int !@value_type in
+  get_by_type val_typ handle key
 
-let with_handle get_fun =
+let rec get_prefix_rec handle prefix iter_handle =
+  let value_len = allocate size_t Unsigned.UInt64.zero in
+  let value_type = allocate cmap_value_types_t 0 in
+  let key_arr = CArray.make char 256 in
+  let key = CArray.start key_arr in
+  match
+    cmap_iter_next handle iter_handle key value_len value_type
+    |> CmapError.from_int
+  with
+  | CsOk ->
+      let key_name = Ctypes_std_views.string_of_char_ptr key in
+      let val_typ = CmapValuetype.from_int !@value_type in
+      get_by_type val_typ handle key_name >>= fun hd ->
+      get_prefix_rec handle prefix iter_handle >>= fun tl ->
+      Ok ((key_name, hd) :: tl)
+  | CsErrNoSections ->
+      (* no more sections to iterate *)
+      Ok []
+  | e ->
+      Error e
+
+let get_prefix handle prefix =
+  let iter_handle = allocate cmap_iter_handle_t Unsigned.UInt64.zero in
+  cmap_iter_init handle prefix iter_handle |> CmapError.to_result >>= fun () ->
+  get_prefix_rec handle prefix !@iter_handle >>= fun r ->
+  cmap_iter_finialize handle !@iter_handle |> CmapError.to_result >>= fun () ->
+  Ok r
+
+let with_handle f =
   let handle = allocate cmap_handle_t Unsigned.UInt64.zero in
-  let _e = cmap_initialize handle in
-
-  let r = get_fun handle in
-  ignore @@ cmap_finalize !@handle ;
-  r
-
-(* let res = allocate string "" in
-
-   let _e = cmap_get_string !@handle key res in
-   print_endline !@res ; *)
+  cmap_initialize handle |> CmapError.to_result >>= fun () ->
+  let r = f !@handle in
+  cmap_finalize !@handle |> CmapError.to_result >>= fun () -> r
