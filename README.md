@@ -1,0 +1,1 @@
+# OCaml Corosync binding
