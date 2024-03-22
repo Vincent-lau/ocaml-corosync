@@ -1,5 +1,5 @@
 (library
  (name corosync)
  (libraries ctypes ctypes-foreign stdint)
- (flags :standard -cclib -lcmap -cclib -lqb)
+ (flags :standard -cclib -lcmap -cclib -lqb -cclib -lquorum)
  )
