@@ -17,9 +17,9 @@
 (documentation https://url/to/documentation)
 
 (package
- (name corosync)
+ (name ocaml-corosync)
  (synopsis "OCaml Corosync binding")
- (description "A longer description")
+ (description "An OCaml language to the libcorosync")
  (depends ocaml dune)
  (tags
   (topics "to describe" your project)))
