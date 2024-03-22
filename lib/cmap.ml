@@ -1,5 +1,6 @@
 open Ctypes
 open Foreign
+open Cserror
 
 let ( >>= ) = Result.bind
 
@@ -9,106 +10,6 @@ let size_t = uint64_t
 
 let cmap_value_types_t = int
 
-let cs_error_t = int
-
-module CmapError = struct
-  exception Unknown_Err_Code of int
-
-  type t =
-    | CsOk
-    | CsErrLibrary
-    | CsErrVersion
-    | CsErrInit
-    | CsErrTimeout
-    | CsErrTryAgain
-    | CsErrInvalidParam
-    | CsErrNoMemory
-    | CsErrBadHandle
-    | CsErrBusy
-    | CsErrAccess (* 11 *)
-    | CsErrNotExist (* 12 *)
-    | CsErrNameTooLong (* 13 *)
-    | CsErrExist (* 14 *)
-    | CsErrNoSpace (* 15 *)
-    | CsErrInterupt
-    | CsErrNameNotFound
-    | CsErrNoResources
-    | CsErrNotSupported
-    | CsErrBadOperation
-    | CsErrFailedOperation
-    | CsErrMessageError
-    | CsErrQueueFull
-    | CsErrQueueNotAvailable
-    | CsErrBadFlags
-    | CsErrTooBig (* 26 *)
-    | CsErrNoSections (* 27 *)
-    | CsErrContextNotFound (* 28 *)
-    | CsErrTooManyGroups (* 30 *)
-    | CsErrSecurity (* 100 *)
-
-  let from_int = function
-    | 1 ->
-        CsOk
-    | 2 ->
-        CsErrLibrary
-    | 3 ->
-        CsErrVersion
-    (* TODO finish this *)
-    | 11 ->
-        CsErrExist
-    | 12 ->
-        CsErrNotExist
-    | 13 ->
-        CsErrNameTooLong
-    | 14 ->
-        CsErrExist
-    | 15 ->
-        CsErrNoSpace
-    | 16 ->
-        CsErrInterupt
-    | 17 ->
-        CsErrNameNotFound
-    | 18 ->
-        CsErrNoResources
-    | 19 ->
-        CsErrNotSupported
-    | 20 ->
-        CsErrBadOperation
-    | 21 ->
-        CsErrFailedOperation
-    | 22 ->
-        CsErrMessageError
-    | 23 ->
-        CsErrQueueFull
-    | 24 ->
-        CsErrQueueNotAvailable
-    | 25 ->
-        CsErrBadFlags
-    | 26 ->
-        CsErrTooBig
-    | 27 ->
-        CsErrNoSections
-    | 28 ->
-        CsErrContextNotFound
-    | 30 ->
-        CsErrTooManyGroups
-    | 100 ->
-        CsErrSecurity
-    | e ->
-        raise (Unknown_Err_Code e)
-
-  let to_result n = from_int n |> function CsOk -> Ok () | e -> Error e
-
-  let to_string = function
-    | CsOk ->
-        "cs_ok"
-    | CsErrNoSections ->
-        "cs_err_no_sections"
-    | CsErrLibrary ->
-        "cs_err_library"
-    | _ ->
-        failwith "Unimplemented"
-end
 
 module CmapValuetype = struct
   exception Unsupported_Valuetype of int
@@ -285,7 +186,6 @@ let cmap_iter_finialize =
 (* higher level get functions *)
 
 open CmapRet
-open CmapError
 
 let get_int8 handle key =
   let res = allocate int8_t 0 in
@@ -360,7 +260,7 @@ let get_by_type = function
 let get handle key =
   let value_len = allocate size_t Unsigned.UInt64.zero in
   let value_type = allocate cmap_value_types_t 0 in
-  cmap_get handle key null value_len value_type |> CmapError.to_result
+  cmap_get handle key null value_len value_type |> to_result
   >>= fun () ->
   let val_typ = CmapValuetype.from_int !@value_type in
   get_by_type val_typ handle key
@@ -372,7 +272,7 @@ let rec get_prefix_rec handle prefix iter_handle =
   let key = CArray.start key_arr in
   match
     cmap_iter_next handle iter_handle key value_len value_type
-    |> CmapError.from_int
+    |> Cserror.from_int
   with
   | CsOk ->
       let key_name = Ctypes_std_views.string_of_char_ptr key in
@@ -388,13 +288,13 @@ let rec get_prefix_rec handle prefix iter_handle =
 
 let get_prefix handle prefix =
   let iter_handle = allocate cmap_iter_handle_t Unsigned.UInt64.zero in
-  cmap_iter_init handle prefix iter_handle |> CmapError.to_result >>= fun () ->
+  cmap_iter_init handle prefix iter_handle |> Cserror.to_result >>= fun () ->
   get_prefix_rec handle prefix !@iter_handle >>= fun r ->
-  cmap_iter_finialize handle !@iter_handle |> CmapError.to_result >>= fun () ->
+  cmap_iter_finialize handle !@iter_handle |> Cserror.to_result >>= fun () ->
   Ok r
 
 let with_handle f =
   let handle = allocate cmap_handle_t Unsigned.UInt64.zero in
-  cmap_initialize handle |> CmapError.to_result >>= fun () ->
+  cmap_initialize handle |> Cserror.to_result >>= fun () ->
   let r = f !@handle in
-  cmap_finalize !@handle |> CmapError.to_result >>= fun () -> r
+  cmap_finalize !@handle |> Cserror.to_result >>= fun () -> r
