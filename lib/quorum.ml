@@ -43,9 +43,14 @@ let getquorate handle =
   let is_quorate = allocate int 0 in
   quorum_getquorate handle is_quorate |> Cserror.to_result >>= fun () ->
   match !@is_quorate with
-  | 1 -> Ok true
-  | 0 -> Ok false
-  | _ -> Error CsErrOcamlCompat
+  | 1 ->
+      Ok true
+  | 0 ->
+      Ok false
+  | _ ->
+      Error CsErrOcamlCompat
+
+(* TODO track start and track stop functions *)
 
 let with_handle f =
   let qhandle = allocate quorum_handle_t Unsigned.UInt64.zero in
