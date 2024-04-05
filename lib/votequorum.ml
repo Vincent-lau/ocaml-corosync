@@ -4,6 +4,8 @@ open Cserror
 
 let ( >>= ) = Result.bind
 
+let votequorum_qdevice_max_name_len = 255
+
 let votequorum_handle_t = uint64_t
 
 (* struct votequorum_node_t *)
@@ -92,7 +94,9 @@ let flags = field votequorum_info "flags" uint
 
 let qdevice_votes = field votequorum_info "qdevice_votes" uint
 
-let qdevice_name = field votequorum_info "qdevice_name" string
+let qdevice_name =
+  field votequorum_info "qdevice_name"
+    (array votequorum_qdevice_max_name_len char)
 
 let () = seal votequorum_info
 
@@ -130,7 +134,8 @@ type vinfo = {
 
 let getinfo handle =
   let info = make votequorum_info in
-  votequorum_getinfo handle Unsigned.UInt.zero (addr info) |> Cserror.to_result
+  Cfg.(with_handle cfg_local_get) >>= fun ournodeid ->
+  votequorum_getinfo handle ournodeid (addr info) |> Cserror.to_result
   >>= fun () ->
   Ok
     {
@@ -143,7 +148,10 @@ let getinfo handle =
     ; quorum= getf info quorum
     ; flags= getf info flags
     ; qdevice_votes= getf info qdevice_votes
-    ; qdevice_name= getf info qdevice_name
+    ; qdevice_name=
+        getf info qdevice_name
+        |> CArray.start
+        |> Ctypes_std_views.string_of_char_ptr
     }
 
 let with_handle f =
@@ -152,4 +160,4 @@ let with_handle f =
   |> Cserror.to_result
   >>= fun () ->
   let r = f !@handle in
-  votequorum_finalize !@handle |> Cserror.to_result >>= fun () -> !@r
+  votequorum_finalize !@handle |> Cserror.to_result >>= fun () -> r
