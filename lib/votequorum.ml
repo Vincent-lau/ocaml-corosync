@@ -1,6 +1,7 @@
 open Ctypes
 open Foreign
-open Cserror
+open Corotypes
+open CsError
 
 let ( >>= ) = Result.bind
 
@@ -135,8 +136,7 @@ type vinfo = {
 let getinfo handle =
   let info = make votequorum_info in
   Cfg.(with_handle cfg_local_get) >>= fun ournodeid ->
-  votequorum_getinfo handle ournodeid (addr info) |> Cserror.to_result
-  >>= fun () ->
+  votequorum_getinfo handle ournodeid (addr info) |> to_result >>= fun () ->
   Ok
     {
       node_id= getf info node_id
@@ -157,7 +157,7 @@ let getinfo handle =
 let with_handle f =
   let handle = allocate votequorum_handle_t Unsigned.UInt64.zero in
   votequorum_initialize handle (from_voidp votequorum_callbacks_t null)
-  |> Cserror.to_result
+  |> to_result
   >>= fun () ->
   let r = f !@handle in
-  votequorum_finalize !@handle |> Cserror.to_result >>= fun () -> r
+  votequorum_finalize !@handle |> to_result >>= fun () -> r

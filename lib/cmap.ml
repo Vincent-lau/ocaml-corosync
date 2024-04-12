@@ -1,6 +1,7 @@
 open Ctypes
 open Foreign
-open Cserror
+open Corotypes
+open CsError
 
 let ( >>= ) = Result.bind
 
@@ -9,7 +10,6 @@ let cmap_handle_t = uint64_t
 let size_t = uint64_t
 
 let cmap_value_types_t = int
-
 
 module CmapValuetype = struct
   exception Unsupported_Valuetype of int
@@ -255,12 +255,12 @@ let get_by_type = function
   | CmapValuetype.CmapValString ->
       get_string
   | CmapValuetype.CmapValBinary ->
-      failwith "Unimplemented"
+      failwith "CmapValBinary Unimplemented"
 
 let get handle key =
   let value_len = allocate size_t Unsigned.UInt64.zero in
   let value_type = allocate cmap_value_types_t 0 in
-  cmap_get handle key null value_len value_type |> to_result
+  cmap_get handle key null value_len value_type |> CsError.to_result
   >>= fun () ->
   let val_typ = CmapValuetype.from_int !@value_type in
   get_by_type val_typ handle key
@@ -272,7 +272,7 @@ let rec get_prefix_rec handle prefix iter_handle =
   let key = CArray.start key_arr in
   match
     cmap_iter_next handle iter_handle key value_len value_type
-    |> Cserror.from_int
+    |> CsError.from_int
   with
   | CsOk ->
       let key_name = Ctypes_std_views.string_of_char_ptr key in
@@ -288,13 +288,16 @@ let rec get_prefix_rec handle prefix iter_handle =
 
 let get_prefix handle prefix =
   let iter_handle = allocate cmap_iter_handle_t Unsigned.UInt64.zero in
-  cmap_iter_init handle prefix iter_handle |> Cserror.to_result >>= fun () ->
+  cmap_iter_init handle prefix iter_handle |> CsError.to_result >>= fun () ->
   get_prefix_rec handle prefix !@iter_handle >>= fun r ->
-  cmap_iter_finialize handle !@iter_handle |> Cserror.to_result >>= fun () ->
+  cmap_iter_finialize handle !@iter_handle |> CsError.to_result >>= fun () ->
   Ok r
 
+(** with_handle will take a function f which takes a handle and performs operations
+  with that handle. with_handle f will automatically create that handle and pass
+  it to f and close that handle afterwards *)
 let with_handle f =
   let handle = allocate cmap_handle_t Unsigned.UInt64.zero in
-  cmap_initialize handle |> Cserror.to_result >>= fun () ->
+  cmap_initialize handle |> CsError.to_result >>= fun () ->
   let r = f !@handle in
-  cmap_finalize !@handle |> Cserror.to_result >>= fun () -> r
+  cmap_finalize !@handle |> CsError.to_result >>= fun () -> r
