@@ -1,6 +1,7 @@
 open Ctypes
 open Foreign
-open Cserror
+open Corotypes
+open CsError
 
 let ( >>= ) = Result.bind
 
@@ -9,6 +10,18 @@ let ( >>= ) = Result.bind
 let corosync_cfg_handle_t = uint64_t
 
 type corosync_cfg_callbacks_t
+
+type corosync_cfg_node_address_t
+
+let corosync_cfg_node_address_t : corosync_cfg_node_address_t structure typ =
+  structure "corosync_cfg_node_address_t"
+
+let address_length = field corosync_cfg_node_address_t "address_length" int
+
+(* TODO encode sizeof(struct sockaddr_in6) *)
+let address = field corosync_cfg_node_address_t "address" (array 30 char)
+
+let () = seal corosync_cfg_node_address_t
 
 (* TODO integrate this *)
 module Corosync_cfg_shutdown_flags = struct
@@ -61,19 +74,52 @@ let corosync_cfg_local_get =
   foreign "corosync_cfg_local_get"
     (corosync_cfg_handle_t @-> ptr uint @-> returning cs_error_t)
 
+let corosync_cfg_get_node_addrs =
+  foreign "corosync_cfg_get_node_addrs"
+    (corosync_cfg_handle_t
+    @-> uint
+    @-> uint64_t
+    @-> ptr int
+    @-> ptr corosync_cfg_node_address_t
+    @-> returning cs_error_t
+    )
+
 (* TODO implement cfg reload *)
 
 (* wrapper and exposed functions *)
 
 let cfg_local_get handle =
   let local_nodeid = allocate uint Unsigned.UInt.zero in
-  corosync_cfg_local_get handle local_nodeid |> Cserror.to_result >>= fun () ->
+  corosync_cfg_local_get handle local_nodeid |> to_result >>= fun () ->
   Ok !@local_nodeid
+
+type cfg_node_address = {addr_len: int; addr: string}
+
+let cfg_get_node_addrs chandle nodeid =
+  let num_addrs = allocate int 0 in
+  let addrs = CArray.make corosync_cfg_node_address_t interface_max in
+  corosync_cfg_get_node_addrs chandle
+    (Unsigned.UInt.of_int nodeid)
+    (Unsigned.UInt64.of_int interface_max)
+    num_addrs (CArray.start addrs)
+  |> to_result
+  >>= fun () ->
+  Ok
+    (CArray.fold_left
+       (fun acc a ->
+         let addr_len = getf a address_length in
+         let addr =
+           getf a address |> CArray.start |> Ctypes_std_views.string_of_char_ptr
+         in
+         {addr_len; addr} :: acc
+       )
+       [] addrs
+    )
 
 let with_handle f =
   let handle = allocate corosync_cfg_handle_t Unsigned.UInt64.zero in
   corosync_cfg_initialize handle (from_voidp corosync_cfg_callbacks_t null)
-  |> Cserror.to_result
+  |> to_result
   >>= fun () ->
   let r = f !@handle in
-  corosync_cfg_finalize !@handle |> Cserror.to_result >>= fun () -> r
+  corosync_cfg_finalize !@handle |> to_result >>= fun () -> r
