@@ -1,5 +1,4 @@
 (executable
  (public_name ocaml-corosync)
  (name main)
- (libraries corosync)
- )
+ (libraries corosync))
