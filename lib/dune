@@ -1,4 +1,5 @@
 (library
  (name corosync)
+ (public_name ocaml-corosync)
  (libraries ctypes ctypes-foreign stdint)
  (c_library_flags -lcmap -lqb -lquorum -lcfg -lvotequorum))
