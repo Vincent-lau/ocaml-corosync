@@ -19,8 +19,8 @@
 (package
  (name ocaml-corosync)
  (synopsis "OCaml Corosync binding")
- (description "An OCaml language to the libcorosync")
- (depends ocaml dune)
+ (description "An OCaml language binding to libcorosync")
+ (depends ocaml dune stdint)
  (tags
   (topics "to describe" your project)))
 
