@@ -1,2 +1,5 @@
 (test
- (name corosync))
+ (name test_main)
+ (libraries alcotest corosync) 
+ 
+ )

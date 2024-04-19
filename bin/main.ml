@@ -6,11 +6,12 @@ open Quorumtool
 let _test_cmap () =
   let open Cmap in
   ( with_handle @@ fun handle ->
-    Cmap.get_prefix handle "totem" |> function
+    Cmap.get handle "nodelist.node.0.name" |> function
     | Ok l ->
-        List.iter
-          (fun (k, v) -> Printf.printf "%s: %s\n" k (CmapRet.to_string v))
-          l ;
+        print_endline l ;
+        (* List.iter
+           (fun (k, v) -> Printf.printf "%s: %s\n" k v)
+           l ; *)
         Ok ()
     | Error e ->
         failwith (to_string e)
@@ -54,6 +55,25 @@ let _test_votequorum () =
   )
   |> ignore
 
+let _test_quorumtool () =
+  let open Quorumtool in
+  update_membership_info AddressFormatName
+  >>= (fun () ->
+        print_int (ViewList.get_view_list_entries ()) ;
+        print_newline () ;
+        List.iter
+          (fun n ->
+            Printf.printf "nodeid %d node name %s"
+              ViewList.(n.node_id)
+              ViewList.(Option.get n.name) ;
+            print_string " "
+          )
+          (ViewList.get_view_list ()) ;
+        print_newline () ;
+        Ok ()
+      )
+  |> ignore
+
 let _test_cfg () =
   let open Cfg in
   ( with_handle @@ fun handle ->
@@ -68,4 +88,4 @@ let _test_cfg () =
   )
   |> ignore
 
-let () = _test_quorum ()
+let () = _test_quorumtool ()
