@@ -263,7 +263,7 @@ let get handle key =
   cmap_get handle key null value_len value_type |> CsError.to_result
   >>= fun () ->
   let val_typ = CmapValuetype.from_int !@value_type in
-  get_by_type val_typ handle key
+  get_by_type val_typ handle key >>= fun r -> Ok (CmapRet.to_string r)
 
 let rec get_prefix_rec handle prefix iter_handle =
   let value_len = allocate size_t Unsigned.UInt64.zero in
@@ -279,7 +279,7 @@ let rec get_prefix_rec handle prefix iter_handle =
       let val_typ = CmapValuetype.from_int !@value_type in
       get_by_type val_typ handle key_name >>= fun hd ->
       get_prefix_rec handle prefix iter_handle >>= fun tl ->
-      Ok ((key_name, hd) :: tl)
+      Ok ((key_name, CmapRet.to_string hd) :: tl)
   | CsErrNoSections ->
       (* no more sections to iterate *)
       Ok []
