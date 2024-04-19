@@ -1,4 +1,5 @@
 (lang dune 3.11)
+
 (using ctypes 0.3)
 
 (name ocaml-corosync)
@@ -20,7 +21,7 @@
  (name ocaml-corosync)
  (synopsis "OCaml Corosync binding")
  (description "An OCaml language binding to libcorosync")
- (depends ocaml dune stdint)
+ (depends ocaml dune stdint alcotest :with-test)
  (tags
   (topics "to describe" your project)))
 

@@ -1,5 +1,5 @@
-(test
- (name test_main)
- (libraries alcotest corosync) 
+(tests
+ (names test_cmapctl test_cfgtool test_quorumtool)
+ (libraries corosync alcotest) 
  
  )
