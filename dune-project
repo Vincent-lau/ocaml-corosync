@@ -13,7 +13,7 @@
 
 (maintainers "Shuntian Liu")
 
-(license LICENSE)
+(license LGPL-2.1-only)
 
 (documentation https://url/to/documentation)
 
@@ -21,7 +21,11 @@
  (name ocaml-corosync)
  (synopsis "OCaml Corosync binding")
  (description "An OCaml language binding to libcorosync")
- (depends ocaml dune stdint alcotest :with-test)
+ (depends
+  ocaml
+  dune
+  stdint
+  (alcotest :with-test))
  (tags
   (topics "to describe" your project)))
 
