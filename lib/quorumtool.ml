@@ -4,6 +4,8 @@ open CsError
 
 let ( >>= ) = Result.bind
 
+type name_format = AddressFormatName | AddressFormatIP
+
 module ViewList = struct
   let mu = Mutex.create ()
 
@@ -27,16 +29,34 @@ module ViewList = struct
        )
     |> ( := ) g_view_list
 
-  let resolve_view_list_names () =
+  let get_name_by_format handle node_id = function
+    | AddressFormatIP ->
+        let open Cfg in
+        cfg_get_node_addrs handle node_id >>= fun node_addrs ->
+        Ok (List.map (fun {addr; _} -> addr) node_addrs |> String.concat ",")
+    | AddressFormatName ->
+        let open Cmap in
+        with_handle @@ fun chandle ->
+        get_prefix chandle "nodelist.node" >>= fun node_list ->
+        List.find_opt (fun (_k, v) -> v = string_of_int node_id) node_list
+        |> Option.fold ~none:(Error CsErrNotExist) ~some:(fun (name_key, _v) ->
+               Scanf.sscanf name_key "nodelist.node.%d.nodeid" Fun.id
+               |> Result.ok
+           )
+        >>= fun id ->
+        Printf.sprintf "nodelist.node.%d.name" id |> fun k ->
+        List.assoc_opt k node_list
+        |> Option.fold ~none:(Error CsErrExist) ~some:Result.ok
+
+  let resolve_view_list_names format =
     let open Cfg in
     Mutex.lock mu ;
     let new_view_list =
       List.map
         (fun {node_id; _} ->
           with_handle @@ fun handle ->
-          cfg_get_node_addrs handle node_id >>= fun node_addrs ->
-          List.map (fun {addr; _} -> addr) node_addrs |> String.concat ","
-          |> fun addr -> Ok {node_id; name= Some addr; vq_info= None}
+          get_name_by_format handle node_id format >>= fun addr ->
+          Ok {node_id; name= Some addr; vq_info= None}
         )
         !g_view_list
     in
@@ -97,7 +117,7 @@ let dispatch qhandle flag =
   in
   dispatch_aux qhandle flag
 
-let with_handle f =
+let update_membership_info name_format =
   let open Quorum in
   let qhandle = allocate quorum_handle_t Unsigned.UInt64.zero in
   let qtype = allocate uint32_t Unsigned.UInt32.zero in
@@ -108,6 +128,16 @@ let with_handle f =
   |> CsError.to_result
   >>= fun () ->
   dispatch !@qhandle CsDispatchFlag.(CsDispatchOne |> to_int) >>= fun () ->
-  let r = f !@qhandle in
   quorum_trackstop !@qhandle |> CsError.to_result >>= fun () ->
-  quorum_finalize !@qhandle |> to_result >>= fun () -> r
+  ViewList.resolve_view_list_names name_format >>= fun () ->
+  quorum_finalize !@qhandle |> to_result
+
+let is_quorate () = Quorum.(with_handle @@ getquorate)
+
+let using_votequorum () =
+  Cmapctl.get "quorum.provider"
+  |> Result.fold
+       ~ok:(String.equal "corosync_votequorum")
+       ~error:(Fun.const false)
+
+let votequorum_info () = Votequorum.(with_handle @@ getinfo)
