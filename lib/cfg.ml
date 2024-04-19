@@ -84,7 +84,9 @@ let corosync_cfg_get_node_addrs =
     @-> returning cs_error_t
     )
 
-(* TODO implement cfg reload *)
+let corosync_cfg_reload_config =
+  foreign "corosync_cfg_reload_config"
+    (corosync_cfg_handle_t @-> returning cs_error_t)
 
 (* wrapper and exposed functions *)
 
@@ -115,6 +117,8 @@ let cfg_get_node_addrs chandle nodeid =
        )
        [] addrs
     )
+
+let cfg_reload_config handle = corosync_cfg_reload_config handle |> to_result
 
 let with_handle f =
   let handle = allocate corosync_cfg_handle_t Unsigned.UInt64.zero in
