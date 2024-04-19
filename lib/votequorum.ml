@@ -136,7 +136,9 @@ type vinfo = {
 let getinfo handle =
   let info = make votequorum_info in
   Cfg.(with_handle cfg_local_get) >>= fun ournodeid ->
-  votequorum_getinfo handle ournodeid (addr info) |> to_result >>= fun () ->
+  votequorum_getinfo handle (Unsigned.UInt.of_int ournodeid) (addr info)
+  |> to_result
+  >>= fun () ->
   Ok
     {
       node_id= getf info node_id

@@ -93,7 +93,7 @@ let corosync_cfg_reload_config =
 let cfg_local_get handle =
   let local_nodeid = allocate uint Unsigned.UInt.zero in
   corosync_cfg_local_get handle local_nodeid |> to_result >>= fun () ->
-  Ok !@local_nodeid
+  Ok (Unsigned.UInt.to_int !@local_nodeid)
 
 type cfg_node_address = {addr_len: int; addr: string}
 
