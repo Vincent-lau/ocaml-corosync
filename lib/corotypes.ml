@@ -37,6 +37,7 @@ module CsError = struct
     | CsErrTooManyGroups (* 30 *)
     | CsErrSecurity (* 100 *)
     (* ocaml side error *)
+    | CsErrNoVoteQuorum (* 998 *)
     | CsErrOcamlCompat (* 999 *)
 
   let from_int = function

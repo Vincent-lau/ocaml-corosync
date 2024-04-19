@@ -79,13 +79,9 @@ module ViewList = struct
     copy_view_list view_list !g_view_list_entries ;
     Mutex.unlock mu
 
-  let get_view_list_entries () =
-    let r = ref 0 in
-    Mutex.lock mu ;
-    r := !g_view_list_entries ;
-    Mutex.unlock mu ;
-    !r
-
+  (** A view_list contains the current members in the quorum. Call this function
+  to retrieve it. Call [update_membership_info] to update the viewlist before 
+  retrieving view_list *)
   let get_view_list () =
     let r : view_list_entry list ref = ref [] in
     Mutex.lock mu ;
@@ -117,6 +113,8 @@ let dispatch qhandle flag =
   in
   dispatch_aux qhandle flag
 
+(** This function is run to update the membership info stored in the viewlist.
+    Run it before retrieving view_list entries. *)
 let update_membership_info name_format =
   let open Quorum in
   let qhandle = allocate quorum_handle_t Unsigned.UInt64.zero in
@@ -132,6 +130,16 @@ let update_membership_info name_format =
   ViewList.resolve_view_list_names name_format >>= fun () ->
   quorum_finalize !@qhandle |> to_result
 
+(*
+  The output of corosync-quorumtool can be separated into three sections: 
+  1. Quorum information
+  2. Votequorum information
+  3. Membership information
+
+  The second and third part are present only if votequorum(5) is enabled in corosync.
+
+*)
+
 let is_quorate () = Quorum.(with_handle @@ getquorate)
 
 let using_votequorum () =
@@ -140,4 +148,8 @@ let using_votequorum () =
        ~ok:(String.equal "corosync_votequorum")
        ~error:(Fun.const false)
 
-let votequorum_info () = Votequorum.(with_handle @@ getinfo)
+let votequorum_info () =
+  if using_votequorum () then
+    Votequorum.(with_handle @@ getinfo)
+  else
+    Error CsErrNoVoteQuorum
