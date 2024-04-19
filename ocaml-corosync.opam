@@ -4,7 +4,7 @@ synopsis: "OCaml Corosync binding"
 description: "An OCaml language binding to libcorosync"
 maintainer: ["Shuntian Liu"]
 authors: ["Shuntian Liu"]
-license: "LICENSE"
+license: "LGPL-2.1-only"
 tags: ["topics" "to describe" "your" "project"]
 homepage: "https://github.com/Vincent-lau/ocaml-corosync"
 doc: "https://url/to/documentation"
@@ -13,8 +13,7 @@ depends: [
   "ocaml"
   "dune" {>= "3.11"}
   "stdint"
-  "alcotest"
-  ":with-test"
+  "alcotest" {with-test}
   "odoc" {with-doc}
 ]
 build: [
