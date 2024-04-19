@@ -1,7 +1,5 @@
 open Cfg
 
-let ( >>= ) = Result.bind
-
 let local_get () = with_handle @@ cfg_local_get
 
 let reload_config () = with_handle @@ cfg_reload_config
