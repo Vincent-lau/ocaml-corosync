@@ -13,6 +13,7 @@ depends: [
   "ocaml"
   "dune" {>= "3.11"}
   "stdint"
+  "ctypes"
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]

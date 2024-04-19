@@ -25,6 +25,7 @@
   ocaml
   dune
   stdint
+  ctypes
   (alcotest :with-test))
  (tags
   (topics "to describe" your project)))
