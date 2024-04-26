@@ -2,7 +2,7 @@
 
 (using ctypes 0.3)
 
-(name ocaml-corosync)
+(name corosync)
 
 (generate_opam_files true)
 
@@ -18,7 +18,7 @@
 (documentation https://url/to/documentation)
 
 (package
- (name ocaml-corosync)
+ (name corosync)
  (synopsis "OCaml Corosync binding")
  (description "An OCaml language binding to libcorosync")
  (depends
@@ -26,6 +26,7 @@
   dune
   stdint
   ctypes
+  ctypes-foreign
   (alcotest :with-test))
  (tags
   (topics "to describe" your project)))
