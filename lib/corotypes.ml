@@ -108,18 +108,71 @@ module CsError = struct
 
   let to_result n = from_int n |> function CsOk -> Ok () | e -> Error e
 
-  (* TODO finish this *)
   let to_string = function
     | CsOk ->
         "cs_ok"
-    | CsErrNoSections ->
-        "cs_err_no_sections"
     | CsErrLibrary ->
         "cs_err_library"
+    | CsErrVersion ->
+        "cs_err_version"
+    | CsErrInit ->
+        "cs_err_init"
+    | CsErrTimeout ->
+        "cs_err_timeout"
+    | CsErrTryAgain ->
+        "cs_err_try_again"
+    | CsErrInvalidParam ->
+        "cs_err_invalid_param"
+    | CsErrNoMemory ->
+        "cs_err_no_memroy"
+    | CsErrBadHandle ->
+        "cs_err_bad_handle"
+    | CsErrBusy ->
+        "cs_err_busy"
+    | CsErrAccess ->
+        "cs_err_access"
+    | CsErrNotExist ->
+        "cs_err_not_exist"
+    | CsErrNameTooLong ->
+        "cs_err_name_too_long"
+    | CsErrExist ->
+        "cs_err_exist"
+    | CsErrNoSpace ->
+        "cs_err_no_space"
+    | CsErrInterupt ->
+        "cs_err_interrupt"
+    | CsErrNameNotFound ->
+        "cs_err_name_not_found"
+    | CsErrNoResources ->
+        "cs_err_no_resources"
+    | CsErrNotSupported ->
+        "cs_err_not_supported"
+    | CsErrBadOperation ->
+        "cs_err_bad_operation"
+    | CsErrFailedOperation ->
+        "cs_err_failed_opearation"
+    | CsErrMessageError ->
+        "cs_err_message_error"
+    | CsErrQueueFull ->
+        "cs_err_queue_full"
+    | CsErrQueueNotAvailable ->
+        "cs_err_queue_not_available"
+    | CsErrBadFlags ->
+        "cs_err_bad_flags"
+    | CsErrTooBig ->
+        "cs_err_too_big"
+    | CsErrNoSections ->
+        "cs_err_no_sections"
+    | CsErrContextNotFound ->
+        "cs_err_context_not_found"
+    | CsErrTooManyGroups ->
+        "cs_err_too_many_groups"
+    | CsErrSecurity ->
+        "cs_err_security"
+    | CsErrNoVoteQuorum ->
+        "cs_err_no_vote_quorum"
     | CsErrOcamlCompat ->
         "unknown return value from corosync, ocaml cannot parse"
-    | _ ->
-        failwith "cserror to string Unimplemented"
 end
 
 module CsDispatchFlag = struct
