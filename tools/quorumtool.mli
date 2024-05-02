@@ -1,3 +1,6 @@
+open Corosync_lib
+
+
 type name_format = AddressFormatName | AddressFormatIP
 
 module ViewList : sig

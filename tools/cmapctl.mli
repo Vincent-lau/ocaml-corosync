@@ -1,3 +1,5 @@
+open Corosync_lib
+
 val get : string -> (string, Corotypes.CsError.t) result
 (** [get key] will retrieve the value associated with the [key] in corosync cmap *)
 

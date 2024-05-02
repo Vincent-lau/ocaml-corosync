@@ -1,0 +1,5 @@
+(library
+ (name corosync_tools)
+ (public_name corosync.tools)
+ (libraries corosync_lib)
+ (c_library_flags -Wl,--no-as-needed -lcmap -lqb -lquorum -lcfg -lvotequorum))

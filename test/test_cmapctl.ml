@@ -1,4 +1,5 @@
-open Corosync.Cmapctl
+open Corosync_tools
+open Cmapctl
 
 let ( >>= ) = Result.bind
 

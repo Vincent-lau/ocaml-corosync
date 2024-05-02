@@ -1,3 +1,4 @@
+open Corosync_lib
 open Cfg
 
 let local_get () = with_handle @@ cfg_local_get

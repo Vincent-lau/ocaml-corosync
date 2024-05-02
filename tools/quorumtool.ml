@@ -1,4 +1,5 @@
 open Ctypes
+open Corosync_lib
 open Corotypes
 open CsError
 

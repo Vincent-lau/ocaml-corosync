@@ -1,4 +1,5 @@
-open Corosync.Quorumtool
+open Corosync_tools
+open Quorumtool
 
 let ( >>= ) = Result.bind
 

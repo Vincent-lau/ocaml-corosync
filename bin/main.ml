@@ -1,9 +1,9 @@
-open Corosync
+open Corosync_lib
 open Corotypes
 open CsError
-open Quorumtool
+open Corosync_tools.Quorumtool
 
-let (>>=) = Result.bind
+let ( >>= ) = Result.bind
 
 let _test_cmap () =
   let open Cmap in
@@ -58,7 +58,6 @@ let _test_votequorum () =
   |> ignore
 
 let _test_quorumtool () =
-  let open Quorumtool in
   update_membership_info AddressFormatName
   >>= (fun () ->
         (* print_int (ViewList.get_view_list_entries ()) ; *)

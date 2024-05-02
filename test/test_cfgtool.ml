@@ -1,4 +1,5 @@
-open Corosync.Cfgtool
+open Corosync_tools
+open Cfgtool
 
 let ( >>= ) = Result.bind
 
