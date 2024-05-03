@@ -1,3 +1,9 @@
-(tests
- (names test_cmapctl test_cfgtool test_quorumtool)
+(executables
+ (names test_cmapctl test_cfgtool test_quorumtool nocorosync_test)
  (libraries corosync_lib alcotest corosync_tools))
+
+(rule
+ (alias runtest)
+ (deps (:x nocorosync_test.exe))
+ (action (run %{x})) 
+)
