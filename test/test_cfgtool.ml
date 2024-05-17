@@ -21,11 +21,10 @@ let test_get_node_addrs () =
       )
   |> ignore
 
-let () =
+let tests =
   let open Alcotest in
-  run "Cfgtool"
-    [
-      ("local_get", [test_case "local get" `Quick test_local_get])
-    ; ("reload_config", [test_case "reload config" `Quick test_reload_config])
-    ; ("get_node_addrs", [test_case "get node addrs" `Quick test_get_node_addrs])
-    ]
+  [
+    ("local_get", [test_case "local get" `Quick test_local_get])
+  ; ("reload_config", [test_case "reload config" `Quick test_reload_config])
+  ; ("get_node_addrs", [test_case "get node addrs" `Quick test_get_node_addrs])
+  ]

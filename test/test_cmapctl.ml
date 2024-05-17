@@ -1,5 +1,7 @@
 open Corosync_tools
+open Corosync_lib
 open Cmapctl
+open Cmap.CmapValue
 
 let ( >>= ) = Result.bind
 
@@ -23,14 +25,24 @@ let test_get_prefix () =
       )
   |> ignore
 
-let () =
-  let open Alcotest in
-  run "Cmapctl"
+let test_set () =
+  let r = set "totem.cluster" (CmapString "hello") in
+  Alcotest.(check bool) "successful set" true (Result.is_ok r) ;
+  get "totem.cluster"
+  >>= (fun cn ->
+        Alcotest.(check string) "get what you set" "hello" cn ;
+        Ok ()
+      )
+  |> ignore
+
+let tests =
+    let open Alcotest in 
     [
       ( "get"
       , [
           test_case "get totem.version" `Quick test_get
         ; test_case "get nodelist prefix" `Quick test_get_prefix
+        ; test_case "set cluster name and get it" `Quick test_set
         ]
       )
     ]

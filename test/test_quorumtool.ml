@@ -20,9 +20,8 @@ let test_votequorum_info () =
   let r = votequorum_info () in
   Alcotest.(check bool) "successful votequorum info" true (Result.is_ok r)
 
-let () =
+let tests =
   let open Alcotest in
-  run "Quorumtool"
     [
       ("quorum", [test_case "is quorate" `Quick test_is_quorate])
     ; ( "votequorum"
