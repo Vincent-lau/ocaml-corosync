@@ -3,5 +3,7 @@ open Cmap
 
 let get key = with_handle @@ fun handle -> get handle key
 
+let set key value = with_handle @@ fun handle -> set handle key value
+
 let get_prefix prefix =
   with_handle @@ fun handle -> get_prefix handle prefix
