@@ -22,12 +22,12 @@ let test_votequorum_info () =
 
 let tests =
   let open Alcotest in
-    [
-      ("quorum", [test_case "is quorate" `Quick test_is_quorate])
-    ; ( "votequorum"
-      , [
-          test_case "is using votequorum" `Quick test_using_vote_quorum
-        ; test_case "get node addrs" `Quick test_votequorum_info
-        ]
-      )
-    ]
+  [
+    ("quorum", [test_case "is quorate" `Quick test_is_quorate])
+  ; ( "votequorum"
+    , [
+        test_case "is using votequorum" `Quick test_using_vote_quorum
+      ; test_case "get node addrs" `Quick test_votequorum_info
+      ]
+    )
+  ]

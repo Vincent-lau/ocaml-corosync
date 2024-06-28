@@ -36,13 +36,13 @@ let test_set () =
   |> ignore
 
 let tests =
-    let open Alcotest in 
-    [
-      ( "get"
-      , [
-          test_case "get totem.version" `Quick test_get
-        ; test_case "get nodelist prefix" `Quick test_get_prefix
-        ; test_case "set cluster name and get it" `Quick test_set
-        ]
-      )
-    ]
+  let open Alcotest in
+  [
+    ( "get"
+    , [
+        test_case "get totem.version" `Quick test_get
+      ; test_case "get nodelist prefix" `Quick test_get_prefix
+      ; test_case "set cluster name and get it" `Quick test_set
+      ]
+    )
+  ]
