@@ -114,8 +114,6 @@ let dispatch qhandle flag =
   in
   dispatch_aux qhandle flag
 
-(** This function is run to update the membership info stored in the viewlist.
-    Run it before retrieving view_list entries. *)
 let update_membership_info name_format =
   let open Quorum in
   let qhandle = allocate quorum_handle_t Unsigned.UInt64.zero in
