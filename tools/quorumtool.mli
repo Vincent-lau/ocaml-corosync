@@ -3,9 +3,11 @@ open Corosync_lib
 type name_format = AddressFormatName | AddressFormatIP
 
 module ViewList : sig
+  type node_name = Name of string | Ips of Ipaddr.t list
+
   type view_list_entry = {
       vq_info: Votequorum.vinfo option
-    ; name: string option
+    ; name: node_name option
     ; node_id: int
   }
 

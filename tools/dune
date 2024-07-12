@@ -1,5 +1,5 @@
 (library
  (name corosync_tools)
  (public_name corosync.tools)
- (libraries corosync_lib)
+ (libraries corosync_lib astring ipaddr)
  (c_library_flags -Wl,--no-as-needed -lcmap -lqb -lquorum -lcfg -lvotequorum))

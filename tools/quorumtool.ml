@@ -12,9 +12,11 @@ module ViewList = struct
 
   let g_view_list_entries = ref 0
 
+  type node_name = Name of string | Ips of Ipaddr.t list
+
   type view_list_entry = {
       vq_info: Votequorum.vinfo option
-    ; name: string option
+    ; name: node_name option (* either the hostname or the ipaddrs *)
     ; node_id: int
   }
 
@@ -30,11 +32,40 @@ module ViewList = struct
        )
     |> ( := ) g_view_list
 
-  let get_name_by_format handle node_id = function
-    | AddressFormatIP ->
-        let open Cfg in
-        cfg_get_node_addrs handle node_id >>= fun node_addrs ->
-        Ok (List.map (fun {addr; _} -> addr) node_addrs |> String.concat ",")
+  let get_name_by_format node_id = function
+    | AddressFormatIP -> (
+        let open Cmap in
+        with_handle @@ fun chandle ->
+        get_prefix chandle "nodelist.node" >>= fun node_list ->
+        List.find_opt (fun (_k, v) -> v = string_of_int node_id) node_list
+        |> Option.fold ~none:(Error CsErrNotExist) ~some:(fun (name_key, _v) ->
+               Scanf.sscanf name_key "nodelist.node.%d.nodeid" Fun.id
+               |> Result.ok
+           )
+        >>= fun index ->
+        List.filter_map
+          (fun (k, v) ->
+            if
+              Astring.String.is_prefix
+                ~affix:(Printf.sprintf "nodelist.node.%d.ring" index)
+                k
+            then
+              Some v
+            else
+              None
+          )
+          node_list
+        |> fun l ->
+        (try List.map Ipaddr.of_string_exn l with Ipaddr.Parse_error _ -> [])
+        |> function
+        | [] ->
+            Error CsErrExist
+        | ipaddrs ->
+            Ok (Ips ipaddrs)
+        (* let open Cfg in
+           cfg_get_node_addrs handle node_id >>= fun node_addrs ->
+           Ok (List.map (fun {addr; _} -> addr) node_addrs |> String.concat ",") *)
+      )
     | AddressFormatName ->
         let open Cmap in
         with_handle @@ fun chandle ->
@@ -47,7 +78,9 @@ module ViewList = struct
         >>= fun id ->
         Printf.sprintf "nodelist.node.%d.name" id |> fun k ->
         List.assoc_opt k node_list
-        |> Option.fold ~none:(Error CsErrExist) ~some:Result.ok
+        |> Option.fold ~none:(Error CsErrExist) ~some:(fun name ->
+               Ok (Name name)
+           )
 
   let resolve_view_list_names format =
     let open Cfg in
@@ -55,22 +88,18 @@ module ViewList = struct
     let new_view_list =
       List.map
         (fun {node_id; _} ->
-          with_handle @@ fun handle ->
-          get_name_by_format handle node_id format >>= fun addr ->
+          get_name_by_format node_id format >>= fun addr ->
           Ok {node_id; name= Some addr; vq_info= None}
         )
         !g_view_list
     in
-    List.find_opt Result.is_error new_view_list
-    |> Option.fold
-         ~some:(fun e ->
-           let e = Result.get_error e in
-           Error e
-         )
-         ~none:(Ok (List.map Result.get_ok new_view_list))
-    >>= fun new_list ->
-    g_view_list := new_list ;
-    Ok () >>= fun () -> Mutex.unlock mu ; Ok ()
+    match List.find_opt Result.is_error new_view_list with
+    | Some e ->
+        Result.get_error e |> Result.error
+    | None ->
+        Ok (List.map Result.get_ok new_view_list) >>= fun new_list ->
+        g_view_list := new_list ;
+        Ok () >>= fun () -> Mutex.unlock mu ; Ok ()
 
   let ocaml_quorum_notify_fn _handle _quorate _ring_seq view_list_entries
       view_list =

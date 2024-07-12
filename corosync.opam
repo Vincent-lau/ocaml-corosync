@@ -15,6 +15,7 @@ depends: [
   "stdint"
   "ctypes"
   "ctypes-foreign"
+  "ipaddr"
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]
