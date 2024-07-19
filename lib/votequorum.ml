@@ -133,10 +133,9 @@ type vinfo = {
   ; qdevice_name: string
 }
 
-let getinfo handle =
+let get_info handle nodeid =
   let info = make votequorum_info in
-  Cfg.(with_handle cfg_local_get) >>= fun ournodeid ->
-  votequorum_getinfo handle (Unsigned.UInt.of_int ournodeid) (addr info)
+  votequorum_getinfo handle (Unsigned.UInt.of_int nodeid) (addr info)
   |> to_result
   >>= fun () ->
   Ok
@@ -155,6 +154,9 @@ let getinfo handle =
         |> CArray.start
         |> Ctypes_std_views.string_of_char_ptr
     }
+
+let get_my_info handle =
+  Cfg.(with_handle cfg_local_get) >>= fun me -> get_info handle me
 
 let with_handle f =
   let handle = allocate votequorum_handle_t Unsigned.UInt64.zero in

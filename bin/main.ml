@@ -55,7 +55,7 @@ let _test_quorum () =
 let _test_votequorum () =
   let open Votequorum in
   ( with_handle @@ fun handle ->
-    match getinfo handle with
+    match get_my_info handle with
     | Ok info ->
         Printf.printf "total votes %d\n" (Unsigned.UInt.to_int info.total_votes) ;
         Printf.printf "quorum %d\n" (Unsigned.UInt.to_int info.quorum) ;
@@ -67,8 +67,8 @@ let _test_votequorum () =
   |> ignore
 
 let _test_quorumtool () =
-  update_membership_info AddressFormatIP
-  >>= (fun () ->
+  quorum_members AddressFormatIP
+  >>= (fun members ->
         (* print_int (ViewList.get_view_list_entries ()) ; *)
         print_newline () ;
         List.iter
@@ -86,7 +86,7 @@ let _test_quorumtool () =
               node_name ;
             print_string " "
           )
-          (ViewList.get_view_list ()) ;
+          members ;
         print_newline () ;
         Ok ()
       )

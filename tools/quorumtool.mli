@@ -1,4 +1,5 @@
 open Corosync_lib
+open Corotypes
 
 type name_format = AddressFormatName | AddressFormatIP
 
@@ -17,12 +18,13 @@ module ViewList : sig
       [Error] when calling [update_membership_info] *)
 end
 
-val update_membership_info : name_format -> (unit, Corotypes.CsError.t) result
-(** This function is run to update the membership info stored in the viewlist.
-    Run it before retrieving view_list entries. *)
-
-val is_quorate : unit -> (bool, Corotypes.CsError.t) result
+val is_quorate : unit -> (bool, CsError.t) result
 
 val using_votequorum : unit -> bool
 
-val votequorum_info : unit -> (Votequorum.vinfo, Corotypes.CsError.t) result
+val votequorum_info : int -> (Votequorum.vinfo, CsError.t) result
+
+val my_votequorum_info : unit -> (Votequorum.vinfo, CsError.t) result
+
+val quorum_members :
+  name_format -> (ViewList.view_list_entry list, CsError.t) result

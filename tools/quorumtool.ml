@@ -143,21 +143,6 @@ let dispatch qhandle flag =
   in
   dispatch_aux qhandle flag
 
-let update_membership_info name_format =
-  let open Quorum in
-  let qhandle = allocate quorum_handle_t Unsigned.UInt64.zero in
-  let qtype = allocate uint32_t Unsigned.UInt32.zero in
-  let qcb = make quorum_callbacks_t in
-  setf qcb quorum_notify_fn ViewList.ocaml_quorum_notify_fn ;
-  quorum_initialize qhandle (addr qcb) qtype |> CsError.to_result >>= fun () ->
-  quorum_trackstart !@qhandle (Unsigned.UInt.of_int cs_track_current)
-  |> CsError.to_result
-  >>= fun () ->
-  dispatch !@qhandle CsDispatchFlag.(CsDispatchOne |> to_int) >>= fun () ->
-  quorum_trackstop !@qhandle |> CsError.to_result >>= fun () ->
-  ViewList.resolve_view_list_names name_format >>= fun () ->
-  quorum_finalize !@qhandle |> to_result
-
 (*
   The output of corosync-quorumtool can be separated into three sections: 
   1. Quorum information
@@ -168,6 +153,21 @@ let update_membership_info name_format =
 
 *)
 
+let with_quorum_track f =
+  let open Quorum in
+  let qhandle = allocate quorum_handle_t Unsigned.UInt64.zero in
+  let qtype = allocate uint32_t Unsigned.UInt32.zero in
+  let qcb = make quorum_callbacks_t in
+  setf qcb quorum_notify_fn ViewList.ocaml_quorum_notify_fn ;
+  quorum_initialize qhandle (addr qcb) qtype |> CsError.to_result >>= fun () ->
+  quorum_trackstart !@qhandle (Unsigned.UInt.of_int cs_track_current)
+  |> CsError.to_result
+  >>= fun () ->
+  dispatch !@qhandle CsDispatchFlag.(CsDispatchOne |> to_int) >>= fun () ->
+  let r = f () in
+  quorum_trackstop !@qhandle |> CsError.to_result >>= fun () ->
+  quorum_finalize !@qhandle |> to_result >>= fun () -> r
+
 let is_quorate () = Quorum.(with_handle @@ getquorate)
 
 let using_votequorum () =
@@ -176,8 +176,26 @@ let using_votequorum () =
        ~ok:(String.equal "corosync_votequorum")
        ~error:(Fun.const false)
 
-let votequorum_info () =
+let votequorum_info id =
   if using_votequorum () then
-    Votequorum.(with_handle @@ getinfo)
+    Votequorum.(with_handle @@ fun handle -> get_info handle id)
   else
     Error CsErrNoVoteQuorum
+
+let my_votequorum_info () = Cfg.(with_handle cfg_local_get) >>= votequorum_info
+
+let quorum_members name_format =
+  with_quorum_track @@ fun () ->
+  let open ViewList in
+  ViewList.resolve_view_list_names name_format >>= fun () ->
+  ViewList.get_view_list () |> Result.ok >>= fun vl ->
+  let vqinfo_l = List.map (fun {node_id; _} -> votequorum_info node_id) vl in
+  ( match List.find_opt Result.is_error vqinfo_l with
+  | Some e ->
+      Result.get_error e |> Result.error
+  | None ->
+      Ok (List.map Result.get_ok vqinfo_l)
+  )
+  >>= fun vqinfo_l ->
+  List.map2 (fun vq_info vle -> {vle with vq_info= Some vq_info}) vqinfo_l vl
+  |> Result.ok

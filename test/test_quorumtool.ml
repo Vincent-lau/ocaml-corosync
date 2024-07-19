@@ -17,7 +17,7 @@ let test_using_vote_quorum () =
   Alcotest.(check bool) "is using vote quorum" true r
 
 let test_votequorum_info () =
-  let r = votequorum_info () in
+  let r = my_votequorum_info () in
   Alcotest.(check bool) "successful votequorum info" true (Result.is_ok r)
 
 let tests =
