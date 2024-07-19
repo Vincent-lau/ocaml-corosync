@@ -9,6 +9,13 @@
  (action
   (run %{x})))
 
+(rule
+ (alias realtest)
+ (deps
+  (:x realorosync_test.exe))
+ (action
+  (run %{x})))
+
 (install
  (section bin)
  (files
