@@ -13,7 +13,7 @@
 
 (maintainers "Shuntian Liu")
 
-(license LGPL-2.1-only)
+(license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
 
 (documentation https://url/to/documentation)
 

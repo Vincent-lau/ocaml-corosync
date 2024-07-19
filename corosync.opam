@@ -4,7 +4,7 @@ synopsis: "OCaml Corosync binding"
 description: "An OCaml language binding to libcorosync"
 maintainer: ["Shuntian Liu"]
 authors: ["Shuntian Liu"]
-license: "LGPL-2.1-only"
+license: "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
 tags: ["corosync" "binding"]
 homepage: "https://github.com/Vincent-lau/ocaml-corosync"
 doc: "https://url/to/documentation"
