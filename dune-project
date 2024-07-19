@@ -27,6 +27,7 @@
   stdint
   ctypes
   ctypes-foreign
+  ipaddr
   (alcotest :with-test))
  (tags
   (topics "to describe" your project)))
