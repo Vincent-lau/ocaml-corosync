@@ -30,6 +30,6 @@
   ipaddr
   (alcotest :with-test))
  (tags
-  (topics "to describe" your project)))
+  (corosync binding)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

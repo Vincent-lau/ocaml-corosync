@@ -5,7 +5,7 @@ description: "An OCaml language binding to libcorosync"
 maintainer: ["Shuntian Liu"]
 authors: ["Shuntian Liu"]
 license: "LGPL-2.1-only"
-tags: ["topics" "to describe" "your" "project"]
+tags: ["corosync" "binding"]
 homepage: "https://github.com/Vincent-lau/ocaml-corosync"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/Vincent-lau/ocaml-corosync/issues"
