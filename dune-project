@@ -15,7 +15,7 @@
 
 (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
 
-(documentation https://url/to/documentation)
+(documentation https://Vincent-lau.github.io/ocaml-corosync/doc)
 
 (package
  (name corosync)

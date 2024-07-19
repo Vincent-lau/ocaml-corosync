@@ -7,7 +7,7 @@ authors: ["Shuntian Liu"]
 license: "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
 tags: ["corosync" "binding"]
 homepage: "https://github.com/Vincent-lau/ocaml-corosync"
-doc: "https://url/to/documentation"
+doc: "https://Vincent-lau.github.io/ocaml-corosync/doc"
 bug-reports: "https://github.com/Vincent-lau/ocaml-corosync/issues"
 depends: [
   "astring" {>= "0.8.5"}
