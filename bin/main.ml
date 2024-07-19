@@ -2,13 +2,14 @@ open Corosync_lib
 open Corotypes
 open CsError
 open Corosync_tools.Quorumtool
+open Corosync_tools
 
 let ( >>= ) = Result.bind
 
 let _test_cmap () =
   let open Cmap in
   ( with_handle @@ fun handle ->
-    Cmap.get handle "nodelist.node.0.name" |> function
+    Cmap.get handle "totem.cluster_name" |> function
     | Ok l ->
         print_endline l ;
         (* List.iter
@@ -30,9 +31,17 @@ let _test_quorum () =
         print_newline () ;
         List.iter
           (fun n ->
+            let open ViewList in
+            let node_name =
+              match Option.get n.name with
+              | Name name ->
+                  name
+              | Ips ipaddrs ->
+                  String.concat "," (List.map Ipaddr.to_string ipaddrs)
+            in
             Printf.printf "nodeid %d node name %s"
               ViewList.(n.node_id)
-              ViewList.(Option.get n.name) ;
+              node_name ;
             print_string " "
           )
           (ViewList.get_view_list ()) ;
@@ -58,15 +67,23 @@ let _test_votequorum () =
   |> ignore
 
 let _test_quorumtool () =
-  update_membership_info AddressFormatName
+  update_membership_info AddressFormatIP
   >>= (fun () ->
         (* print_int (ViewList.get_view_list_entries ()) ; *)
         print_newline () ;
         List.iter
           (fun n ->
+            let open ViewList in
+            let node_name =
+              match Option.get n.name with
+              | Name name ->
+                  name
+              | Ips ipaddrs ->
+                  String.concat "," (List.map Ipaddr.to_string ipaddrs)
+            in
             Printf.printf "nodeid %d node name %s"
               ViewList.(n.node_id)
-              ViewList.(Option.get n.name) ;
+              node_name ;
             print_string " "
           )
           (ViewList.get_view_list ()) ;
@@ -87,6 +104,17 @@ let _test_cfg () =
     | Error e ->
         failwith (to_string e)
   )
+  |> ignore
+
+let _test_cmapctl () =
+  Cmapctl.get_prefix "nodelist.node"
+  |> (function
+       | Ok l ->
+           List.iter (fun (k, v) -> Printf.printf "%s: %s\n" k v) l ;
+           Ok ()
+       | Error e ->
+           failwith (to_string e)
+       )
   |> ignore
 
 let () = _test_quorumtool ()
