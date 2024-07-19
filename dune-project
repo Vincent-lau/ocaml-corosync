@@ -22,14 +22,14 @@
  (synopsis "OCaml Corosync binding")
  (description "An OCaml language binding to libcorosync")
  (depends
+  (astring
+   (>= 0.8.5))
   ocaml
   dune
   stdint
   ctypes
   ctypes-foreign
   ipaddr
-  (alcotest :with-test))
+  alcotest)
  (tags
   (corosync binding)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

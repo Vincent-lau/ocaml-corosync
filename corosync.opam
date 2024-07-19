@@ -10,13 +10,14 @@ homepage: "https://github.com/Vincent-lau/ocaml-corosync"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/Vincent-lau/ocaml-corosync/issues"
 depends: [
+  "astring" {>= "0.8.5"}
   "ocaml"
   "dune" {>= "3.11"}
   "stdint"
   "ctypes"
   "ctypes-foreign"
   "ipaddr"
-  "alcotest" {with-test}
+  "alcotest"
   "odoc" {with-doc}
 ]
 build: [
