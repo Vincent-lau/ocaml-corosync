@@ -24,12 +24,14 @@
  (depends
   (astring
    (>= 0.8.5))
-  ocaml
-  dune
+  (ocaml (>= 4.08))
+  (dune (>= 3.16))
   stdint
-  ctypes
-  ctypes-foreign
+  (ctypes (>= 0.22.0))
+  (ctypes-foreign (>= 0.22.0))
   ipaddr
-  alcotest)
+  (alcotest (>= 1.7.0))
+  conf-libcorosync
+  )
  (tags
   (corosync binding)))
