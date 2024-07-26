@@ -1,16 +1,15 @@
 open Corosync_tools
 open Corosync_lib
 open Cmapctl
-open Cmap.CmapValue
 
 let ( >>= ) = Result.bind
 
 let test_get () =
-  let r = get "totem.version" in
+  let r = get Cmap.CmapValue.uint32 "totem.version" in
   Alcotest.(check bool) "successful get" true (Result.is_ok r) ;
   r
   >>= (fun version ->
-        Alcotest.(check int) "same version" 2 (int_of_string version) ;
+        Alcotest.(check int) "same version" 2 (Unsigned.UInt32.to_int version) ;
         Ok ()
       )
   |> ignore
@@ -28,7 +27,7 @@ let test_get_prefix () =
 let test_set () =
   let r = set "totem.cluster" (CmapString "hello") in
   Alcotest.(check bool) "successful set" true (Result.is_ok r) ;
-  get "totem.cluster"
+  get Cmap.CmapValue.string "totem.cluster"
   >>= (fun cn ->
         Alcotest.(check string) "get what you set" "hello" cn ;
         Ok ()

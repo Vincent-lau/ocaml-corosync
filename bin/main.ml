@@ -9,7 +9,7 @@ let ( >>= ) = Result.bind
 let _test_cmap () =
   let open Cmap in
   ( with_handle @@ fun handle ->
-    Cmap.get handle "totem.cluster_name" |> function
+    Cmap.get Cmap.CmapValue.string handle "totem.cluster_name" |> function
     | Ok l ->
         print_endline l ;
         (* List.iter

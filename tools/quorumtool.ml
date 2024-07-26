@@ -171,7 +171,7 @@ let with_quorum_track f =
 let is_quorate () = Quorum.(with_handle @@ getquorate)
 
 let using_votequorum () =
-  Cmapctl.get "quorum.provider"
+  Cmapctl.get Cmap.CmapValue.string "quorum.provider"
   |> Result.fold
        ~ok:(String.equal "corosync_votequorum")
        ~error:(Fun.const false)

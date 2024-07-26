@@ -1,7 +1,7 @@
 open Corosync_lib
 open Cmap
 
-let get key = with_handle @@ fun handle -> get handle key
+let get value key = with_handle @@ fun handle -> get value handle key
 
 let set key value = with_handle @@ fun handle -> set handle key value
 

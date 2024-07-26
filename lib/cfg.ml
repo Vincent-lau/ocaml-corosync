@@ -113,7 +113,7 @@ let cfg_get_node_addrs chandle nodeid =
          let addr =
            getf a address |> CArray.start |> Ctypes_std_views.string_of_char_ptr
          in
-         Ctypes_memory_stubs.use_value a;
+         Ctypes_memory_stubs.use_value a ;
          {addr_len; addr} :: acc
        )
        [] addrs
