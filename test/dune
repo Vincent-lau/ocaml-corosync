@@ -12,7 +12,7 @@
 (rule
  (alias realtest)
  (deps
-  (:x realorosync_test.exe))
+  (:x realcorosync_test.exe))
  (action
   (run %{x})))
 
