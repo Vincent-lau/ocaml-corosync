@@ -138,6 +138,10 @@ let get_info handle nodeid =
   votequorum_getinfo handle (Unsigned.UInt.of_int nodeid) (addr info)
   |> to_result
   >>= fun () ->
+  let qdevice_namef = getf info qdevice_name in
+  let qdevice_name =  CArray.start qdevice_namef |> Ctypes_std_views.string_of_char_ptr in
+  (* make sure that qdevice_namef does not get collected until string_of_char_ptr is done *)
+  Ctypes_memory_stubs.use_value qdevice_namef;
   Ok
     {
       node_id= getf info node_id
@@ -149,10 +153,7 @@ let get_info handle nodeid =
     ; quorum= getf info quorum
     ; flags= getf info flags
     ; qdevice_votes= getf info qdevice_votes
-    ; qdevice_name=
-        getf info qdevice_name
-        |> CArray.start
-        |> Ctypes_std_views.string_of_char_ptr
+    ; qdevice_name  
     }
 
 let get_my_info handle =

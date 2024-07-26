@@ -415,6 +415,9 @@ let rec get_prefix_rec handle prefix iter_handle =
   with
   | CsOk ->
       let key_name = Ctypes_std_views.string_of_char_ptr key in
+      (* string_of_char_ptr will allocate a new string, so from this point on 
+      it is safe to collect key_arr and key *)
+      Ctypes_memory_stubs.use_value (key_arr, key);
       let val_typ = CmapValue.of_int !@value_type in
       get_by_type val_typ handle key_name >>= fun hd ->
       get_prefix_rec handle prefix iter_handle >>= fun tl ->
