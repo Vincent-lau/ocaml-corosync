@@ -76,7 +76,7 @@ let cpg_leave =
   foreign "cpg_leave" (cpg_handle_t @-> ptr cpg_name @-> returning cs_error_t)
 
 let cpg_membership_get =
-  foreign "cpg_member_ship_get"
+  foreign "cpg_membership_get"
     (cpg_handle_t
     @-> ptr cpg_name
     @-> ptr cpg_address
@@ -88,17 +88,18 @@ let cpg_local_get =
   foreign "cpg_local_get" (cpg_handle_t @-> ptr uint @-> returning cs_error_t)
 
 (* ocaml APIs *)
+
 let with_handle f =
   let handle = allocate cpg_handle_t Unsigned.UInt64.zero in
-  cpg_initialize handle (from_voidp cpg_callbacks_t null)
-  |> CsError.to_result
+  cpg_initialize handle (from_voidp cpg_callbacks_t null) |> CsError.to_result
   >>= fun () ->
   let r = f !@handle in
   cpg_finalize !@handle |> CsError.to_result >>= fun () -> r
 
-let fd_get handle = 
+let fd_get handle =
   let fd = allocate int 0 in
-  cpg_fd_get handle fd |> to_result >>= fun () ->
-  Ok !@fd
+  cpg_fd_get handle fd |> to_result >>= fun () -> Ok !@fd
 
-
+let local_get handle =
+  let local_nodeid = allocate uint Unsigned.UInt.zero in
+  cpg_local_get handle local_nodeid |> to_result >>= fun () -> Ok !@local_nodeid

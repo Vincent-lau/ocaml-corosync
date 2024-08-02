@@ -2,4 +2,4 @@
  (name corosync_lib)
  (public_name corosync.lib)
  (libraries ctypes ctypes-foreign stdint)
- (c_library_flags -Wl,--no-as-needed -lcmap -lqb -lquorum -lcfg -lvotequorum))
+ (c_library_flags -Wl,--no-as-needed -lcmap -lqb -lquorum -lcfg -lcpg -lvotequorum))

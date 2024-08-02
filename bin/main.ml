@@ -117,4 +117,13 @@ let _test_cmapctl () =
        )
   |> ignore
 
-let () = _test_quorumtool ()
+let _test_cpg () =
+  let open Cpg in
+  ( with_handle @@ fun handle ->
+    Cpg.local_get handle >>= fun id ->
+    Printf.printf "local node id %d\n" (Unsigned.UInt.to_int id) ;
+    Ok ()
+  )
+  |> ignore
+
+let () = _test_cpg ()
