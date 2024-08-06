@@ -429,7 +429,6 @@ let rec get_prefix_rec handle prefix iter_handle =
   let key = CArray.start key_arr in
   match
     cmap_iter_next handle iter_handle key value_len value_type
-    |> CsError.from_int
   with
   | CsOk ->
       let key_name = Ctypes_std_views.string_of_char_ptr key in

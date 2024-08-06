@@ -163,7 +163,7 @@ let with_quorum_track f =
   quorum_trackstart !@qhandle (Unsigned.UInt.of_int cs_track_current)
   |> CsError.to_result
   >>= fun () ->
-  dispatch !@qhandle CsDispatchFlag.(CsDispatchOne |> to_int) >>= fun () ->
+  dispatch !@qhandle CsDispatchFlag.CsDispatchOne >>= fun () ->
   let r = f () in
   quorum_trackstop !@qhandle |> CsError.to_result >>= fun () ->
   quorum_finalize !@qhandle |> to_result >>= fun () -> r

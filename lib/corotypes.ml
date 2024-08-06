@@ -3,8 +3,6 @@ open Ctypes
 module CsError = struct
   exception Unknown_Err_Code of int
 
-  let cs_error_t = int
-
   type t =
     | CsOk
     | CsErrLibrary
@@ -106,7 +104,76 @@ module CsError = struct
     | e ->
         raise (Unknown_Err_Code e)
 
-  let to_result n = from_int n |> function CsOk -> Ok () | e -> Error e
+  let to_int = function
+    | CsOk ->
+        1
+    | CsErrLibrary ->
+        2
+    | CsErrVersion ->
+        3
+    | CsErrInit ->
+        4
+    | CsErrTimeout ->
+        5
+    | CsErrTryAgain ->
+        6
+    | CsErrInvalidParam ->
+        7
+    | CsErrNoMemory ->
+        8
+    | CsErrBadHandle ->
+        9
+    | CsErrBusy ->
+        10
+    | CsErrAccess ->
+        11
+    | CsErrNotExist ->
+        12
+    | CsErrNameTooLong ->
+        13
+    | CsErrExist ->
+        14
+    | CsErrNoSpace ->
+        15
+    | CsErrInterupt ->
+        16
+    | CsErrNameNotFound ->
+        17
+    | CsErrNoResources ->
+        18
+    | CsErrNotSupported ->
+        19
+    | CsErrBadOperation ->
+        20
+    | CsErrFailedOperation ->
+        21
+    | CsErrMessageError ->
+        22
+    | CsErrQueueFull ->
+        23
+    | CsErrQueueNotAvailable ->
+        24
+    | CsErrBadFlags ->
+        25
+    | CsErrTooBig ->
+        26
+    | CsErrNoSections ->
+        27
+    | CsErrContextNotFound ->
+        28
+    | CsErrTooManyGroups ->
+        30
+    | CsErrSecurity ->
+        100
+    (* ocaml side error *)
+    | CsErrNoVoteQuorum ->
+        998
+    | CsErrOcamlCompat ->
+        999
+
+  let cs_error_t = view ~read:from_int ~write:to_int int
+
+  let to_result = function CsOk -> Ok () | e -> Error e
 
   let to_string = function
     | CsOk ->
@@ -184,8 +251,6 @@ module CsDispatchFlag = struct
     | CsDispatchBlocking
     | CsDispatchOneNonBlocking
 
-  let cs_dispatch_flags_t = int
-
   let from_int = function
     | 1 ->
         CsDispatchOne
@@ -207,6 +272,8 @@ module CsDispatchFlag = struct
         3
     | CsDispatchOneNonBlocking ->
         4
+
+  let cs_dispatch_flags_t = view ~read:from_int ~write:to_int int
 end
 
 let cs_track_current = 0x1
