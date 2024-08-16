@@ -8,6 +8,7 @@ and supply that type into this function. The type information for cmap can be
 retrieved by doing a corosync-cmapctl call and examining the types. *)
 
 val set : string -> 'a CmapValue.value -> (unit, Corotypes.CsError.t) result
+(** [set key value] sets the cmap in memory database [key] to [value] *)
 
 val get_prefix : string -> ((string * string) list, Corotypes.CsError.t) result
 (** [get_prefix prefix] will return a list of (k,v) where k has a prefix of [prefix].
