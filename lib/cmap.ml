@@ -427,9 +427,7 @@ let rec get_prefix_rec handle prefix iter_handle =
   let value_type = allocate cmap_value_types_t 0 in
   let key_arr = CArray.make char 256 in
   let key = CArray.start key_arr in
-  match
-    cmap_iter_next handle iter_handle key value_len value_type
-  with
+  match cmap_iter_next handle iter_handle key value_len value_type with
   | CsOk ->
       let key_name = Ctypes_std_views.string_of_char_ptr key in
       (* string_of_char_ptr will allocate a new string, so from this point on
